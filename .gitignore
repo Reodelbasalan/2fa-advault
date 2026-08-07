@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Never commit a real vault. The blob lives in the browser's localStorage, not
+# in this folder, but an exported or backed-up one must not land here either.
+*.vault
+vault-backup*.json

@@ -1,0 +1,602 @@
+/* Vault — visual system
+ *
+ * Black and yellow. The rule the whole sheet follows: yellow is the only
+ * chromatic thing on screen, so it always means "this is the signal" — the
+ * code itself, the primary action, focus. Everything else is a warm neutral
+ * ramp. Greys with a little of the accent's hue in them, not blue-leaning
+ * slate, so the yellow reads as belonging to the surface rather than dropped
+ * onto it.
+ */
+
+:root {
+  --bg: #0a0908;
+  --surface: #121110;
+  --surface-2: #191714;
+  --surface-3: #221f1a;
+  --surface-4: #2e2a21;
+
+  --border: #272219;
+  --border-strong: #3b3427;
+
+  --text: #f7f4ed;
+  --text-dim: #bdb6a7;
+  --muted: #8e8674;
+
+  --accent: #ffd21e;
+  --accent-hover: #ffe066;
+  --accent-press: #e6bb00;
+  --accent-soft: rgba(255, 210, 30, .12);
+  --accent-mid: rgba(255, 210, 30, .24);
+  --accent-ring: rgba(255, 210, 30, .38);
+  --on-accent: #0a0908;
+
+  --danger: #e0524a;
+  --danger-soft: rgba(224, 82, 74, .14);
+
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, .55);
+  --shadow-pop: 0 26px 70px rgba(0, 0, 0, .7);
+  --glow: 0 8px 34px rgba(255, 210, 30, .22);
+
+  /* One easing everywhere. A single spring curve is most of why a set of
+     unrelated animations reads as one product. */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.3, 1.4, .4, 1);
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 14px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Ambient field ─────────────────────────────────────────────────────── */
+
+.ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+
+.ambient__orb {
+  position: absolute;
+  width: 46vmax; height: 46vmax;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: .5;
+}
+.ambient__orb--a {
+  top: -18vmax; left: -12vmax;
+  background: radial-gradient(circle, rgba(255, 210, 30, .16), transparent 68%);
+  animation: drift-a 34s var(--ease) infinite alternate;
+}
+.ambient__orb--b {
+  bottom: -22vmax; right: -14vmax;
+  background: radial-gradient(circle, rgba(255, 160, 30, .11), transparent 68%);
+  animation: drift-b 44s var(--ease) infinite alternate;
+}
+@keyframes drift-a { to { transform: translate3d(14vmax, 9vmax, 0) scale(1.18); } }
+@keyframes drift-b { to { transform: translate3d(-12vmax, -8vmax, 0) scale(1.12); } }
+
+/* Grain. Without it the big blurred gradients band visibly on an OLED-ish
+   near-black; the noise is what breaks the banding up. */
+.ambient__grain {
+  position: absolute; inset: -50%;
+  opacity: .16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* ── Primitives ────────────────────────────────────────────────────────── */
+
+.btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 16px; height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 600 13.5px/1 var(--font);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform .18s var(--ease), background .18s var(--ease),
+              border-color .18s var(--ease), box-shadow .22s var(--ease), color .18s var(--ease);
+}
+.btn svg { width: 17px; height: 17px; flex: none; }
+.btn:hover { background: var(--surface-3); border-color: var(--accent-mid); transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.98); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-ring); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+.btn--primary {
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  border-color: transparent;
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+.btn--primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffe887, var(--accent-hover));
+  box-shadow: var(--glow);
+}
+.btn--primary:active:not(:disabled) { background: var(--accent-press); }
+
+/* A disabled primary drops the fill entirely instead of fading it. Yellow at
+   40% opacity over a dark surface turns muddy olive, which reads as a broken
+   button rather than one that is simply not available yet. */
+.btn--primary:disabled {
+  opacity: 1;
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+/* The sheen. A light band swept across on hover — the single cheapest thing
+   that makes a flat fill read as a physical surface. */
+.btn--primary::after {
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-18deg);
+  opacity: 0;
+}
+.btn--primary:hover:not(:disabled)::after { animation: sheen .75s var(--ease); }
+@keyframes sheen {
+  from { left: -60%; opacity: .9; }
+  to   { left: 130%; opacity: 0; }
+}
+
+.btn--block { width: 100%; }
+.btn--icon { width: 38px; padding: 0; }
+.btn--ghost { background: transparent; border-color: var(--border); color: var(--text-dim); }
+.btn--ghost:hover { background: var(--surface-2); color: var(--text); }
+
+/* Fields */
+.field { display: block; margin-bottom: 14px; }
+.field__label {
+  display: block; margin-bottom: 7px;
+  font: 600 10.5px/1 var(--font);
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted);
+  transition: color .18s var(--ease);
+}
+.field:focus-within .field__label { color: var(--accent); }
+
+.field__wrap {
+  position: relative;
+  display: flex; align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  transition: border-color .18s var(--ease), box-shadow .22s var(--ease), background .18s var(--ease);
+}
+.field__wrap:hover { border-color: var(--surface-4); }
+.field:focus-within .field__wrap {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.field__input {
+  flex: 1; min-width: 0;
+  padding: 0 14px; height: 44px;
+  border: 0; background: none;
+  color: var(--text);
+  font: 400 14px/1 var(--font);
+}
+.field__input:focus { outline: none; }
+.field__input::placeholder { color: #6b6558; }
+.field__input--area {
+  height: auto; padding: 13px 14px;
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.55;
+  resize: vertical;
+}
+.field__hint { display: block; margin-top: 7px; font-size: 12px; color: var(--muted); }
+
+.err {
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: var(--danger-soft);
+  border: 1px solid rgba(224, 82, 74, .3);
+  color: #ffb4ae;
+  font-size: 12.5px;
+  animation: shake .4s var(--ease);
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  30%, 70% { transform: translateX(3px); }
+  50% { transform: translateX(-3px); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+}
+
+/* ── Quick code (on the page, not in a dialog) ─────────────────────────── */
+
+.qp {
+  margin-bottom: 26px;
+  padding: 20px 22px 22px;
+  background: linear-gradient(180deg, rgba(31, 28, 22, .7), rgba(18, 17, 14, .8));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  animation: rise .5s var(--ease) both;
+}
+
+.qp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.qp__title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0;
+  font-size: 15px; font-weight: 650; letter-spacing: -.01em;
+}
+.qp__title svg { width: 17px; height: 17px; color: var(--accent); }
+.qp__note { font-size: 11.5px; color: var(--muted); }
+
+/* Two columns on a desktop: the secret goes in on the left, the code comes out
+   on the right. Both halves visible at once, and the panel stays short enough
+   that the saved accounts below it are still on screen. */
+.qp__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+@media (max-width: 720px) { .qp__grid { grid-template-columns: 1fr; gap: 14px; } }
+
+.qp__col { min-width: 0; }
+.qp__col .field { margin-bottom: 10px; }
+.qp .err { margin: 14px 0 0; }
+
+/* No top border or offset: this is a column beside the input now, not a
+   section stacked under it. The rule left over from the stacked layout drew a
+   stray line and pushed the code box below its own label. */
+.qout { margin: 0; }
+
+/* Waiting for a secret: present, clearly inert. */
+.qout.is-idle .qout__row { border-color: var(--border); border-style: dashed; }
+.qout.is-idle .code { color: #5c5648; }
+.qout.is-idle .ring__bar { stroke: transparent; }
+.qout__row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  /* 7px top matches .field__label's own margin-bottom, so the code box and the
+     secret box beside it start on the same line. */
+  margin: 7px 0 10px; padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--accent-mid);
+  border-radius: var(--radius);
+}
+.code--big { font-size: 34px; }
+
+/* Same warning the cards give in their last five seconds. */
+.qout.is-expiring .qout__row { border-color: rgba(224, 82, 74, .4); }
+.qout.is-expiring .ring__bar { stroke: var(--danger); }
+.qout.is-expiring .ring__n { color: var(--danger); }
+.qout.is-expiring .ring { animation: pulse 1s ease-in-out infinite; }
+
+/* ── App shell ─────────────────────────────────────────────────────────── */
+
+.app { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 22px 22px 80px; }
+
+.sectionhead {
+  margin: 0 0 12px;
+  font: 600 10.5px/1 var(--font);
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted);
+}
+.sectionhead[hidden] { display: none; }
+
+.top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 0 22px;
+  animation: rise .5s var(--ease) both;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; flex: none; }
+.brand__mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--accent-mid); color: var(--accent); }
+.brand__mark svg { width: 20px; height: 20px; }
+.brand__name { font-size: 15.5px; font-weight: 650; letter-spacing: -.01em; }
+
+.search {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 9px;
+  height: 38px; padding: 0 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  transition: border-color .18s var(--ease), box-shadow .22s var(--ease), background .18s var(--ease);
+}
+.search:focus-within { border-color: var(--accent); background: var(--surface-2); box-shadow: 0 0 0 4px var(--accent-soft); color: var(--accent); }
+.search svg { width: 16px; height: 16px; flex: none; }
+.search input {
+  flex: 1; min-width: 0;
+  border: 0; background: none; color: var(--text);
+  font: 400 13.5px/1 var(--font);
+}
+.search input:focus { outline: none; }
+.search input::placeholder { color: #6b6558; }
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.top__actions { display: flex; gap: 8px; flex: none; }
+
+/* On a phone all four things cannot share one row: the search box got squeezed
+   to about six characters wide. Brand and buttons keep the top row; search
+   takes the full width of its own row underneath. */
+@media (max-width: 620px) {
+  .top { flex-wrap: wrap; }
+  .brand { flex: 1; }
+  .search { order: 3; flex-basis: 100%; height: 40px; }
+  /* Scoped to the header only — the Unlock, Get code and Copy buttons all keep
+     their labels, which are the whole point of those buttons. */
+  .top__actions .btn span { display: none; }   /* "Add account" becomes just the + */
+  .top__actions .btn { width: 38px; padding: 0; }
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(292px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  position: relative;
+  padding: 16px 18px 14px;
+  background: linear-gradient(180deg, rgba(29, 26, 21, .72), rgba(17, 16, 14, .82));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  transition: transform .25s var(--ease), border-color .25s var(--ease), box-shadow .3s var(--ease);
+  /* Staggered entrance, --i set per card in JS. */
+  animation: card-in .5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+
+.card:hover { transform: translateY(-3px); border-color: var(--accent-mid); box-shadow: var(--shadow-md); }
+.card:active { transform: translateY(-1px) scale(.995); }
+.card:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+
+/* A soft light that tracks the cursor — --mx/--my are written by JS on
+   pointermove. Makes the card feel lit rather than merely highlighted. */
+.card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 210, 30, .1), transparent 62%);
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+  pointer-events: none;
+}
+.card:hover::before { opacity: 1; }
+
+.card__head { display: flex; align-items: center; gap: 11px; margin-bottom: 15px; }
+
+.card__mono {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; flex: none;
+  border-radius: 10px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  font: 700 12.5px/1 var(--font);
+  color: var(--accent);
+  letter-spacing: .02em;
+}
+
+.card__id { flex: 1; min-width: 0; }
+.card__issuer {
+  display: block;
+  font-size: 13.5px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card__acct {
+  display: block;
+  font-size: 11.5px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card__del {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; flex: none;
+  border: 0; border-radius: 8px;
+  background: none; color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+}
+.card__del svg { width: 15px; height: 15px; }
+.card:hover .card__del, .card__del:focus-visible { opacity: 1; }
+.card__del:hover { background: var(--danger-soft); color: var(--danger); }
+.card__del.is-arm { opacity: 1; background: var(--danger); color: #fff; width: auto; padding: 0 10px; font: 600 11px/1 var(--font); }
+
+.card__body { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+
+/* The code. Tabular figures and a fixed per-digit width, because a 6-digit
+   number that reflows as it changes is the difference between "a readout" and
+   "text that happens to be numeric". */
+.code {
+  display: flex; align-items: baseline; gap: 2px;
+  font: 600 30px/1 var(--font-mono);
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  transition: color .3s var(--ease);
+}
+.code__d {
+  display: inline-block;
+  width: .62em; text-align: center;
+}
+.code__gap { width: .3em; }
+/* Each digit rolls independently, staggered left-to-right, so a code change
+   sweeps across instead of blinking all at once. */
+.code__d.is-roll { animation: roll .42s var(--ease); }
+@keyframes roll {
+  0%   { transform: translateY(-.42em); opacity: 0; filter: blur(3px); }
+  60%  { filter: blur(0); }
+  100% { transform: none; opacity: 1; }
+}
+/* The code itself does NOT change colour when the window is nearly up. It was
+   yellow here, but yellow is this page's "normal, good" accent everywhere
+   else, so it did not read as a warning — and it fought the red ring beside
+   it. One warning colour, in one place: the ring. The digits stay maximally
+   readable, which is what you actually need in the last two seconds. */
+
+/* Countdown ring */
+.ring { position: relative; width: 42px; height: 42px; flex: none; }
+.ring svg { width: 42px; height: 42px; transform: rotate(-90deg); }
+/* The track has to stay clearly visible. The bar depletes as the window runs
+   out, so in the last seconds it is a stub — against an invisible track that
+   reads as a rendering glitch rather than "nearly expired". */
+.ring__track { stroke: #453d2e; }
+.ring__bar {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke .3s var(--ease);
+}
+.card.is-expiring .ring__bar { stroke: var(--danger); }
+.ring__n {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font: 600 12px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  transition: color .3s var(--ease);
+}
+.card.is-expiring .ring__n { color: var(--danger); }
+.card.is-expiring .ring { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.07); } }
+
+.card__foot {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+  transition: color .2s var(--ease);
+}
+.card:hover .card__foot { color: var(--text-dim); }
+.card__foot svg { width: 13px; height: 13px; }
+
+/* Copy confirmation: the whole card flashes accent once and the footer swaps
+   to a tick. Feedback at the size of the thing you clicked. */
+.card.is-copied { border-color: var(--accent); box-shadow: var(--glow); }
+.card.is-copied .card__foot { color: var(--accent); }
+.card.is-copied::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--accent-soft);
+  animation: flash .6s var(--ease) forwards;
+  pointer-events: none;
+}
+@keyframes flash { to { opacity: 0; } }
+
+/* ── Empty state ───────────────────────────────────────────────────────── */
+
+.empty { padding: 70px 20px; text-align: center; animation: rise .5s var(--ease) both; }
+.empty[hidden] { display: none; }
+.empty__art { width: 74px; height: 74px; margin: 0 auto 20px; color: var(--surface-4); }
+.empty__art svg { width: 100%; height: 100%; }
+.empty h2 { margin: 0 0 8px; font-size: 16.5px; font-weight: 620; }
+.empty p { margin: 0 auto; max-width: 380px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── Sheet ─────────────────────────────────────────────────────────────── */
+
+.scrim {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(6, 5, 4, .68);
+  backdrop-filter: blur(4px);
+  animation: fade .25s var(--ease) both;
+}
+.scrim[hidden] { display: none; }
+@keyframes fade { from { opacity: 0; } }
+
+.sheet {
+  position: fixed; z-index: 41;
+  left: 50%; top: 50%;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(32, 29, 23, .96), rgba(18, 17, 15, .98));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255, 255, 255, .06);
+  backdrop-filter: blur(24px);
+  transform: translate(-50%, -50%);
+  animation: sheet-in .42s var(--ease-spring) both;
+}
+.sheet[hidden] { display: none; }
+@keyframes sheet-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 22px)) scale(.95); }
+}
+
+.sheet__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.sheet__head h2 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.01em; }
+.sheet__foot { display: flex; justify-content: flex-end; gap: 9px; margin-top: 20px; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+
+.preview {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 4px 0 14px; padding: 14px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color .25s var(--ease), background .25s var(--ease);
+}
+.preview[data-state="ok"] { border-style: solid; border-color: var(--accent-mid); background: var(--accent-soft); }
+.preview[data-state="bad"] { border-style: solid; border-color: rgba(224, 82, 74, .34); background: var(--danger-soft); }
+.preview__label { font: 600 10.5px/1 var(--font); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.preview[data-state="ok"] .preview__label { color: var(--accent); }
+.preview__code {
+  font: 600 22px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.preview[data-state="ok"] .preview__code { color: var(--text); }
+
+/* ── Toast ─────────────────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed; z-index: 60;
+  left: 50%; bottom: 30px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 18px;
+  background: var(--surface-3);
+  border: 1px solid var(--accent-mid);
+  border-radius: 999px;
+  box-shadow: var(--shadow-pop);
+  font-size: 13px; font-weight: 550;
+  transform: translateX(-50%);
+  animation: toast-in .38s var(--ease-spring) both;
+}
+.toast[hidden] { display: none; }
+.toast svg { width: 16px; height: 16px; color: var(--accent); }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 16px) scale(.92); } }
+.toast.is-out { animation: toast-out .25s var(--ease) forwards; }
+@keyframes toast-out { to { opacity: 0; transform: translate(-50%, 10px) scale(.96); } }
+
+/* ── Motion preference ─────────────────────────────────────────────────── */
+/* Movement here is decorative — the countdown ring and the code text carry
+   every piece of real information on their own. So it all goes. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .card:hover { transform: none; }
+}
