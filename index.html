@@ -5,168 +5,176 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
 <meta name="referrer" content="no-referrer" />
-<!-- Nothing here loads or sends anything. The CSP says so out loud so it stays
-     that way: no remote scripts, no fonts, no images, and connect-src 'none'
-     means a stray fetch() would be blocked by the browser, not just absent. -->
+<!-- Same promise as the app: nothing loads or sends anything. The live demo in
+     the hero runs the real engine locally, so connect-src can stay 'none' —
+     the page proves its own pitch. -->
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'" />
-<title>Vault — 2FA codes, offline</title>
+<title>Vault — 2FA codes that never leave your device</title>
 <link rel="stylesheet" href="app.css" />
+<link rel="stylesheet" href="landing.css" />
 </head>
 <body>
 
-<!-- Ambient field. Two slow-drifting accent orbs and a grain wash: enough to
-     stop a near-black page reading as flat, dim enough not to compete with the
-     one thing on screen that is actually yellow. -->
 <div class="ambient" aria-hidden="true">
   <span class="ambient__orb ambient__orb--a"></span>
   <span class="ambient__orb ambient__orb--b"></span>
   <span class="ambient__grain"></span>
 </div>
 
-<!-- ══ APP ═══════════════════════════════════════════════════════════════ -->
-<div id="app" class="app">
+<!-- ══ NAV ═══════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav__brand">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3 27 7.5v8.9c0 6.6-4.5 10.9-11 12.6C9.5 27.3 5 23 5 16.4V7.5L16 3Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="m11.5 16.2 3.2 3.3 6-6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="brand__name">Vault</span>
+  </div>
+  <a class="btn btn--primary" href="app.html">Open the Vault</a>
+</nav>
 
-  <header class="top">
-    <div class="brand">
-      <span class="brand__mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M16 3 27 7.5v8.9c0 6.6-4.5 10.9-11 12.6C9.5 27.3 5 23 5 16.4V7.5L16 3Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="m11.5 16.2 3.2 3.3 6-6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      <span class="brand__name">Vault</span>
+<!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero__copy reveal">
+    <span class="pill">
+      <i class="pill__dot"></i> Runs entirely on your device
+    </span>
+    <h1 class="hero__title">
+      Your 2FA codes,<br><span class="hl">generated where you are</span>
+    </h1>
+    <p class="hero__sub">
+      The same six-digit codes as Google Authenticator — made right in your
+      browser, never sent anywhere. No account, no server, no monthly fee.
+      Unplug the internet and it still works.
+    </p>
+    <div class="hero__cta">
+      <a class="btn btn--primary btn--hero" href="app.html">
+        Open the Vault
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="btn btn--ghost btn--hero" href="#how">See how it works</a>
     </div>
-
-    <label class="search">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.9"/><line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      <input id="search" type="search" placeholder="Search accounts" spellcheck="false" />
-    </label>
-
-    <div class="top__actions">
-      <button class="btn btn--primary" id="add-open">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-        <span>Add account</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- ══ QUICK CODE ══════════════════════════════════════════════════════ -->
-  <!-- On the landing page itself, not behind a button. Paste a secret, get a
-       code — the one thing most people arrive here to do, reachable without
-       clicking anything first. Both halves are on screen from the start so the
-       shape of the flow is visible before you commit to it. -->
-  <section class="qp" id="quick">
-    <header class="qp__head">
-      <h2 class="qp__title">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2.5 4.5 13.5H11l-.8 8 8.3-11H12l1-8Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
-        Quick code
-      </h2>
-      <span class="qp__note">Nothing here is saved.</span>
-    </header>
-
-    <form id="quick-form" autocomplete="off">
-      <div class="qp__grid">
-        <div class="qp__col">
-          <label class="field">
-            <span class="field__label">2FA secret</span>
-            <span class="field__wrap">
-              <textarea id="q-secret" class="field__input field__input--area" rows="2" spellcheck="false"
-                        placeholder="BK5V TVQ7 D2RB…  or an otpauth:// link"></textarea>
-            </span>
-          </label>
-          <button class="btn btn--primary btn--block" id="q-submit" type="submit">Get code</button>
-        </div>
-
-        <div class="qp__col">
-          <span class="field__label">2-step verification code</span>
-          <div class="qout is-idle" id="q-out">
-            <div class="qout__row">
-              <div class="code code--big" id="q-code"></div>
-              <div class="ring" id="q-ring">
-                <svg viewBox="0 0 42 42">
-                  <circle class="ring__track" cx="21" cy="21" r="18" fill="none" stroke-width="3"/>
-                  <circle class="ring__bar" cx="21" cy="21" r="18" fill="none" stroke-width="3" stroke-dasharray="113.09733552923255" stroke-dashoffset="0"/>
-                </svg>
-                <span class="ring__n"></span>
-              </div>
-            </div>
-            <!-- Width comes from a class, not a style attribute: this page's CSP
-                 sets style-src 'self', which drops inline style attributes. -->
-            <button type="button" class="btn btn--primary btn--block" id="q-copy" disabled>
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M15 6.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <span id="q-copy-label">Copy</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <p class="err" id="q-err" role="alert" hidden></p>
-    </form>
-  </section>
-
-  <h2 class="sectionhead" id="saved-head">Saved accounts</h2>
-  <main class="grid" id="grid"></main>
-
-  <div class="empty" id="empty" hidden>
-    <div class="empty__art" aria-hidden="true">
-      <!-- A key, not a padlock. The padlock that was here implied the app locks,
-           which it no longer does — the icon was promising a screen that
-           doesn't exist. -->
-      <svg viewBox="0 0 64 64" fill="none"><circle cx="22" cy="26" r="11" stroke="currentColor" stroke-width="2.6"/><path d="m30 34 20 20M44 48l5-5M38 42l5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-    </div>
-    <h2 id="empty-title">Nothing in the vault yet</h2>
-    <p id="empty-sub">Add your first account and its code will appear here, refreshing every 30 seconds.</p>
+    <ul class="hero__trust">
+      <li>No login</li><li>No server</li><li>Works offline</li><li>Free &amp; open source</li>
+    </ul>
   </div>
 
-</div>
+  <!-- Live demo. A real rotating code from the public RFC test secret, so the
+       hero is the product working, not a picture of it. -->
+  <div class="hero__demo reveal" style="--d:120ms">
+    <div class="demo">
+      <div class="demo__head">
+        <span class="demo__mono">DA</span>
+        <div>
+          <span class="demo__issuer">Demo account</span>
+          <span class="demo__acct">try it live — no setup</span>
+        </div>
+      </div>
+      <div class="demo__body">
+        <div class="code code--big" id="demo-code"></div>
+        <div class="ring" id="demo-ring">
+          <svg viewBox="0 0 42 42">
+            <circle class="ring__track" cx="21" cy="21" r="18" fill="none" stroke-width="3"/>
+            <circle class="ring__bar" cx="21" cy="21" r="18" fill="none" stroke-width="3" stroke-dasharray="113.09733552923255" stroke-dashoffset="0"/>
+          </svg>
+          <span class="ring__n"></span>
+        </div>
+      </div>
+      <p class="demo__foot">Refreshing every 30 seconds — right now, in your browser.</p>
+    </div>
+  </div>
+</header>
 
-<!-- ══ ADD SHEET ═════════════════════════════════════════════════════════ -->
-<div class="scrim" id="scrim" hidden></div>
-<section class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-  <form id="add-form" autocomplete="off">
-    <header class="sheet__head">
-      <h2 id="sheet-title">Add account</h2>
-      <button type="button" class="btn btn--icon btn--ghost" id="add-close" aria-label="Close">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-      </button>
-    </header>
-
-    <label class="field">
-      <span class="field__label">Secret key or otpauth:// link</span>
-      <span class="field__wrap">
-        <textarea id="secret" class="field__input field__input--area" rows="2" spellcheck="false"
-                  placeholder="JBSWY3DPEHPK3PXP  —  or paste the whole otpauth://totp/… link"></textarea>
+<!-- ══ FEATURES ══════════════════════════════════════════════════════════ -->
+<section class="band">
+  <div class="feat">
+    <article class="feat__card reveal">
+      <span class="feat__ic">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="9" width="16" height="12" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
       </span>
-      <span class="field__hint">Spaces and lower case are fine. Pasting the link fills in the name for you.</span>
-    </label>
-
-    <div class="row">
-      <label class="field">
-        <span class="field__label">Service</span>
-        <span class="field__wrap"><input id="issuer" class="field__input" placeholder="OpenAI" spellcheck="false" /></span>
-      </label>
-      <label class="field">
-        <span class="field__label">Account</span>
-        <span class="field__wrap"><input id="account" class="field__input" placeholder="you@example.com" spellcheck="false" /></span>
-      </label>
-    </div>
-
-    <!-- Live proof the secret is right, before it is ever saved: if this shows
-         a code that matches the app you are migrating from, the entry is good. -->
-    <div class="preview" id="preview" data-state="idle">
-      <span class="preview__label" id="preview-label">Preview</span>
-      <span class="preview__code" id="preview-code">– – –  – – –</span>
-    </div>
-
-    <p class="err" id="add-err" role="alert" hidden></p>
-
-    <footer class="sheet__foot">
-      <button type="button" class="btn btn--ghost" id="add-cancel">Cancel</button>
-      <button type="submit" class="btn btn--primary" id="add-save" disabled>Save to vault</button>
-    </footer>
-  </form>
+      <h3>Nothing leaves your device</h3>
+      <p>The code is built locally with the same crypto your browser uses. The page's security policy blocks network requests outright — not just absent, but forbidden.</p>
+    </article>
+    <article class="feat__card reveal" style="--d:80ms">
+      <span class="feat__ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="0" /><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.9"/><path d="M4 12a8 8 0 0 1 8-8M20 12a8 8 0 0 1-8 8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><line x1="7" y1="4" x2="17" y2="20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </span>
+      <h3>Works with no internet</h3>
+      <p>Codes come from a secret and the clock — nothing to fetch. Once the page has loaded, it keeps working on a plane, in a dead spot, anywhere.</p>
+    </article>
+    <article class="feat__card reveal" style="--d:160ms">
+      <span class="feat__ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <h3>No account, ever</h3>
+      <p>No sign-up, no licence key, no subscription. Open the link and it works. All your accounts in one screen, each refreshing on its own.</p>
+    </article>
+    <article class="feat__card reveal" style="--d:240ms">
+      <span class="feat__ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><rect x="8" y="8" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.9"/></svg>
+      </span>
+      <h3>Paste a key or a link</h3>
+      <p>Drop in the Base32 secret or the whole otpauth:// link. A live preview shows the code before you save, so you know it's right.</p>
+    </article>
+  </div>
 </section>
 
-<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<!-- ══ HOW ═══════════════════════════════════════════════════════════════ -->
+<section class="how" id="how">
+  <h2 class="sec__title reveal">Three steps, then never again</h2>
+  <div class="steps">
+    <article class="step reveal">
+      <span class="step__n">1</span>
+      <h3>Grab your setup key</h3>
+      <p>In any account's security settings, choose “Authenticator app”, then tap <em>Can't scan it?</em> to reveal the setup key.</p>
+    </article>
+    <article class="step reveal" style="--d:100ms">
+      <span class="step__n">2</span>
+      <h3>Paste it into the Vault</h3>
+      <p>Spaces and lower case are fine. The preview shows your code instantly — check it against the account, then save.</p>
+    </article>
+    <article class="step reveal" style="--d:200ms">
+      <span class="step__n">3</span>
+      <h3>Tap to copy, forever</h3>
+      <p>The code sits on a card, refreshing every 30 seconds. One tap copies it. No more typing 32-character secrets on every login.</p>
+    </article>
+  </div>
+</section>
 
-<script type="module" src="app.js"></script>
+<!-- ══ SECURITY ══════════════════════════════════════════════════════════ -->
+<section class="band">
+  <div class="trust2 reveal">
+    <div class="trust2__copy">
+      <h2 class="sec__title">Why not just use a website?</h2>
+      <p>Most online 2FA tools ask you to paste your secret into <em>their</em> page. That secret isn't a password — it <strong>is</strong> the second factor, permanently, for every future login on that account. Once it leaves your machine, you can't know what happened to it.</p>
+      <p>This never sends it anywhere. There's no server to trust and no request to intercept. The code is proof: it's running right now, in this tab, with the internet doing nothing.</p>
+      <a class="link" href="https://github.com/Reodelbasalan/2fa-advault" rel="noopener">Read the source on GitHub →</a>
+    </div>
+    <div class="trust2__list">
+      <div class="trust2__row"><span>Where the code is made</span><b>Your browser</b></div>
+      <div class="trust2__row"><span>What's uploaded</span><b>Nothing</b></div>
+      <div class="trust2__row"><span>Standard</span><b>RFC 6238 (TOTP)</b></div>
+      <div class="trust2__row"><span>Works offline</span><b>Yes</b></div>
+      <div class="trust2__row"><span>Price</span><b>Free</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ═════════════════════════════════════════════════════════ -->
+<section class="final reveal">
+  <h2>Ready when you are.</h2>
+  <p>Add your first account in under a minute.</p>
+  <a class="btn btn--primary btn--hero" href="app.html">
+    Open the Vault
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</section>
+
+<footer class="foot">
+  <span>Vault — a local TOTP generator</span>
+  <a class="link" href="https://github.com/Reodelbasalan/2fa-advault" rel="noopener">GitHub</a>
+</footer>
+
+<script type="module" src="landing.js"></script>
 </body>
 </html>

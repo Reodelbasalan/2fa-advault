@@ -105,11 +105,14 @@ someone reading your screen.
 
 | File | |
 |---|---|
+| `index.html` | The landing page — the pitch, with a live demo code in the hero. |
+| `landing.css` / `landing.js` | The landing page's own styles and its live demo. |
+| `app.html` | The app itself (the entry point is the landing page's "Open the Vault"). |
 | `totp.js` | The TOTP engine — RFC 6238 / RFC 4226. Pure: no DOM, no storage, no clock of its own. |
 | `totp.test.mjs` | The official RFC test vectors. |
 | `store.js` | Reading and writing the saved accounts. |
-| `app.js` | UI, and the clock that drives it. |
-| `app.css` | The visual system. |
+| `app.js` | The app's UI, and the clock that drives it. |
+| `app.css` | The visual system, shared by both pages. |
 | `serve.mjs` | A zero-dependency local static server. |
 
 ### Tests
