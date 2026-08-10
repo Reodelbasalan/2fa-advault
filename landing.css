@@ -35,11 +35,14 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 22px;
 }
-.nav__brand { display: flex; align-items: center; gap: 10px; }
+.nav__brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
 .nav .brand__mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--accent-mid); color: var(--accent); }
 .nav .brand__mark svg { width: 20px; height: 20px; }
 .nav .brand__name { font-size: 16px; font-weight: 680; letter-spacing: -.01em; }
 .nav .btn { text-decoration: none; }
+.nav__links { display: flex; align-items: center; gap: 18px; }
+.nav__link { color: var(--text-dim); text-decoration: none; font: 600 13.5px/1 var(--font); transition: color .18s var(--ease); }
+.nav__link:hover { color: var(--accent); }
 
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 

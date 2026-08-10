@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="referrer" content="no-referrer" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>How to use Vault — 2FA guide</title>
+<link rel="stylesheet" href="app.css" />
+<link rel="stylesheet" href="landing.css" />
+<link rel="stylesheet" href="guide.css" />
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <span class="ambient__orb ambient__orb--a"></span>
+  <span class="ambient__orb ambient__orb--b"></span>
+  <span class="ambient__grain"></span>
+</div>
+
+<nav class="nav">
+  <a class="nav__brand" href="index.html">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3 27 7.5v8.9c0 6.6-4.5 10.9-11 12.6C9.5 27.3 5 23 5 16.4V7.5L16 3Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="m11.5 16.2 3.2 3.3 6-6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="brand__name">Vault</span>
+  </a>
+  <a class="btn btn--primary" href="app.html">Open the Vault</a>
+</nav>
+
+<!-- ══ HEADER ════════════════════════════════════════════════════════════ -->
+<header class="ghead">
+  <span class="pill"><i class="pill__dot"></i> Takes about a minute</span>
+  <h1 class="ghead__title">How to use Vault</h1>
+  <p class="ghead__sub">
+    Add a two-factor account once, then get its code with a tap for good.
+    Here's the whole thing, start to finish.
+  </p>
+</header>
+
+<main class="guide">
+
+  <!-- What you need -->
+  <section class="gsec reveal">
+    <h2 class="gsec__title">What you'll need</h2>
+    <p class="gsec__lead">
+      One thing: the <strong>setup key</strong> from the account you want codes
+      for. It's the long code an app screen shows when you turn on an
+      authenticator — usually behind a “Can't scan it?” link under a QR code.
+      It looks like <code>JBSW Y3DP EHPK 3PXP</code>.
+    </p>
+    <div class="callout callout--warn">
+      <strong>Not the same as:</strong> the 6-digit code (that expires in 30s),
+      a backup/recovery code (one-time use), or your password. It has to be the
+      setup key.
+    </div>
+  </section>
+
+  <!-- Two ways -->
+  <section class="gsec reveal">
+    <h2 class="gsec__title">Two ways to use it</h2>
+    <div class="gtwo">
+      <article class="gcard">
+        <span class="gcard__tag gcard__tag--soft">One-off</span>
+        <h3>Quick code</h3>
+        <p>On the front page. Paste a secret, press <em>Get code</em>, copy.
+        Nothing is saved. Use this for a secret you were handed once and don't
+        want left in the browser.</p>
+      </article>
+      <article class="gcard">
+        <span class="gcard__tag">Everyday</span>
+        <h3>Save to vault</h3>
+        <p>For accounts you open all the time. Add it once and it lives on a
+        card that refreshes every 30 seconds — one tap copies the code, no more
+        pasting the long secret each login.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Walkthrough -->
+  <section class="gsec reveal">
+    <h2 class="gsec__title">Step by step</h2>
+    <ol class="walk">
+      <li class="walk__item">
+        <span class="walk__n">1</span>
+        <div class="walk__body">
+          <h3>Find the setup key</h3>
+          <p>In the account's security settings, choose <em>Authenticator app</em>.
+          When the QR code appears, tap <em>Can't scan it?</em> (or “enter this
+          text code”). The long key that shows up is what you need.</p>
+          <p class="walk__eg">Gmail: myaccount.google.com → Security → 2-Step Verification → Authenticator.</p>
+        </div>
+      </li>
+      <li class="walk__item">
+        <span class="walk__n">2</span>
+        <div class="walk__body">
+          <h3>Open Vault and add it</h3>
+          <p>Press <em>Add account</em>, paste the key (spaces and lower case are
+          fine), or paste the whole <code>otpauth://</code> link and the name
+          fills itself in.</p>
+        </div>
+      </li>
+      <li class="walk__item">
+        <span class="walk__n">3</span>
+        <div class="walk__body">
+          <h3>Check the preview, then save</h3>
+          <p>A live code shows in the preview. If it matches the account you're
+          setting up, press <em>Save to vault</em>. If it stays blank, the key
+          was mistyped.</p>
+        </div>
+      </li>
+      <li class="walk__item">
+        <span class="walk__n">4</span>
+        <div class="walk__body">
+          <h3>Use it from then on</h3>
+          <p>The account is now a card. Tap it to copy the current code; the
+          ring shows how many seconds it has left before it changes.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Test it -->
+  <section class="gsec reveal">
+    <h2 class="gsec__title">Want to test it first?</h2>
+    <p class="gsec__lead">
+      Use this public test key — it's from the standard itself, so it's safe to
+      try with nothing at stake:
+    </p>
+    <div class="gtest">
+      <code class="gtest__key">JBSWY3DPEHPK3PXP</code>
+    </div>
+    <p class="gsec__lead">
+      Add the same key to Google Authenticator on your phone and to Vault. If
+      both show the same six digits at the same moment — and change together
+      every 30 seconds — it works.
+    </p>
+  </section>
+
+  <!-- Good to know -->
+  <section class="gsec reveal">
+    <h2 class="gsec__title">Good to know</h2>
+    <div class="gnote-list">
+      <div class="gnote">
+        <h3>Adding it here doesn't remove your old way in</h3>
+        <p>An authenticator is added alongside your phone number and other
+        recovery options — it doesn't replace them. You keep every way back in
+        you already had.</p>
+      </div>
+      <div class="gnote">
+        <h3>Saved accounts stay on this device</h3>
+        <p>They live in this browser only. Open Vault on your phone and your
+        laptop and you'll have two separate lists — there's no sync.</p>
+      </div>
+      <div class="gnote">
+        <h3>Never share a setup key</h3>
+        <p>It isn't a password — it's your 2FA itself, for good. Anyone who sees
+        it can generate your codes. Don't screenshot it or send it to anyone. If
+        it leaks, remove the authenticator and set it up again for a fresh key.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="final reveal">
+    <h2>That's it.</h2>
+    <p>Add your first account and you're done.</p>
+    <a class="btn btn--primary btn--hero" href="app.html">
+      Open the Vault
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>Vault — a local TOTP generator</span>
+  <a class="link" href="https://github.com/Reodelbasalan/2fa-advault" rel="noopener">GitHub</a>
+</footer>
+
+<script type="module" src="landing.js"></script>
+</body>
+</html>

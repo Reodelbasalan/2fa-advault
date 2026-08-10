@@ -14,10 +14,15 @@ const codeEl = document.querySelector("#demo-code");
 const ringBar = document.querySelector("#demo-ring .ring__bar");
 const ringN = document.querySelector("#demo-ring .ring__n");
 
+// This same script also runs on the guide page, which has no hero demo. Without
+// this guard, querying the missing elements throws here and everything below —
+// including the scroll reveals — never runs, leaving that page blank.
+const hasDemo = codeEl && ringBar && ringN;
+
 // Digit cells, built once — same treatment as the app, so the demo animates
 // its digits instead of replacing text wholesale.
 const digits = [];
-(function build() {
+if (hasDemo) (function build() {
   for (let i = 0; i < 6; i++) {
     if (i === 3) {
       const gap = document.createElement("span");
@@ -64,7 +69,7 @@ async function draw() {
   }
   requestAnimationFrame(draw);
 }
-draw();
+if (hasDemo) draw();
 
 // Reveal on scroll. Anything still off-screen fades up as it arrives; if
 // IntersectionObserver is missing, everything is shown at once rather than
