@@ -134,10 +134,53 @@
       </div>
     </div>
 
-    <button class="btn btn--primary btn--block" id="gen-new" type="button">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8M20 3v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 16M4 21v-5h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Generate new
-    </button>
+    <label class="field">
+      <span class="field__label">Label (optional)</span>
+      <span class="field__wrap"><input id="gen-label" class="field__input" placeholder="e.g. Facebook test" spellcheck="false" /></span>
+    </label>
+
+    <div class="gen__actions">
+      <button class="btn btn--ghost btn--block" id="gen-new" type="button">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8M20 3v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 16M4 21v-5h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Generate new
+      </button>
+      <button class="btn btn--primary btn--block" id="gen-save" type="button">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h11l3 3v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 5v5h6V5M8 20v-6h8v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Save
+      </button>
+    </div>
+  </section>
+
+  <!-- ══ SAVED IDENTITIES ════════════════════════════════════════════════ -->
+  <!-- The kept email/password rows. Hidden behind a passphrase gate — casual
+       cover only, NOT encryption; the rows sit in localStorage in the clear. -->
+  <section class="qp" id="ids">
+    <header class="qp__head">
+      <h2 class="qp__title">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="9" width="16" height="12" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        Saved identities
+      </h2>
+      <button type="button" class="btn btn--ghost btn--icon" id="ids-lock" aria-label="Lock" hidden>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="9" width="16" height="12" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <!-- Locked view -->
+    <div class="ids__gate" id="ids-gate">
+      <svg class="ids__gate-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V6.5a4 4 0 0 1 8 0V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>
+      <p class="ids__gate-txt">Enter the passphrase to view saved emails and passwords.</p>
+      <form id="ids-gate-form" autocomplete="off">
+        <div class="ids__gate-row">
+          <input id="ids-pass" class="field__input" type="password" placeholder="Passphrase" spellcheck="false" />
+          <button class="btn btn--primary" id="ids-unlock" type="submit">Unlock</button>
+        </div>
+        <p class="err" id="ids-err" role="alert" hidden></p>
+      </form>
+    </div>
+
+    <!-- Unlocked view -->
+    <div class="ids__list" id="ids-list" hidden></div>
+    <div class="ids__empty" id="ids-empty" hidden>Walang naka-save pa. Pindot “Save” sa taas para magdagdag.</div>
   </section>
 
   <h2 class="sectionhead" id="saved-head">Saved accounts</h2>
