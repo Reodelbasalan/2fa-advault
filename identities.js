@@ -28,11 +28,18 @@ export function add(entry) {
     label: entry.label || "",
     email: entry.email || "",
     password: entry.password || "",
+    status: entry.status || "new",
     ts: Date.now(),
   };
   rows.unshift(row); // newest first
   save(rows);
   return row;
+}
+
+export function setStatus(id, status) {
+  const rows = list();
+  const row = rows.find((e) => e.id === id);
+  if (row) { row.status = status; save(rows); }
 }
 
 export function remove(id) {
