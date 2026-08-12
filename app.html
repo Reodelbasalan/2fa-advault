@@ -134,10 +134,23 @@
       </div>
     </div>
 
-    <label class="field">
-      <span class="field__label">Label (optional)</span>
-      <span class="field__wrap"><input id="gen-label" class="field__input" placeholder="e.g. Facebook test" spellcheck="false" /></span>
-    </label>
+    <div class="gen__meta">
+      <label class="field gen__label-field">
+        <span class="field__label">Label (optional)</span>
+        <span class="field__wrap"><input id="gen-label" class="field__input" placeholder="e.g. Facebook test" spellcheck="false" /></span>
+      </label>
+      <label class="field gen__status-field">
+        <span class="field__label">Status</span>
+        <span class="field__wrap">
+          <select id="gen-status" class="field__input">
+            <option value="new">New</option>
+            <option value="done">Done</option>
+            <option value="notworking">Not working</option>
+            <option value="disabled">Disabled</option>
+          </select>
+        </span>
+      </label>
+    </div>
 
     <div class="gen__actions">
       <button class="btn btn--ghost btn--block" id="gen-new" type="button">
