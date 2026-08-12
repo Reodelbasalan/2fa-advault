@@ -282,6 +282,28 @@ body {
 .qout.is-expiring .ring__n { color: var(--danger); }
 .qout.is-expiring .ring { animation: pulse 1s ease-in-out infinite; }
 
+/* ── Generator ─────────────────────────────────────────────────────────── */
+
+.gen__row { margin-bottom: 12px; }
+.gen__field {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 7px; padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--accent-mid);
+  border-radius: var(--radius);
+}
+.gen__val {
+  flex: 1; min-width: 0;
+  font-size: 14.5px; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  user-select: all;
+}
+.gen__val--mono { font-family: var(--font-mono); letter-spacing: .02em; }
+.gen__copy { flex: none; }
+.gen__copy.is-copied { border-color: var(--accent); color: var(--accent); }
+#gen-new { margin-top: 4px; }
+#gen-new svg { width: 17px; height: 17px; }
+
 /* ── App shell ─────────────────────────────────────────────────────────── */
 
 .app { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 22px 22px 80px; }
