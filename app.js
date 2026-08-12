@@ -619,6 +619,10 @@ const IDS_PASSPHRASE = "admin123";
 
 let idsUnlocked = false;
 
+// Status order for click-to-cycle, and their display labels.
+const STATUS_ORDER = ["new", "done", "notworking", "disabled"];
+const STATUS_LABEL = { new: "New", done: "Done", notworking: "Not working", disabled: "Disabled" };
+
 function renderIdentities() {
   const listEl = $("#ids-list");
   const emptyEl = $("#ids-empty");
@@ -628,10 +632,14 @@ function renderIdentities() {
   emptyEl.hidden = rows.length > 0;
 
   for (const r of rows) {
+    const status = r.status || "new";
     const el = document.createElement("div");
     el.className = "idrow";
     el.innerHTML = `
-      <span class="idrow__label"></span>
+      <div class="idrow__top">
+        <span class="idrow__label"></span>
+        <button type="button" class="tag" data-tag></button>
+      </div>
       <div class="idrow__row2">
         <div class="idrow__pair"><span class="idrow__k">Email</span><span class="idrow__v" data-email></span></div>
         <div class="idrow__pair"><span class="idrow__k">Pass</span><span class="idrow__v idrow__v--mono" data-pass></span></div>
@@ -646,6 +654,17 @@ function renderIdentities() {
     el.querySelector(".idrow__label").textContent = r.label || "";
     el.querySelector("[data-email]").textContent = r.email;
     el.querySelector("[data-pass]").textContent = r.password;
+
+    const tag = el.querySelector("[data-tag]");
+    tag.dataset.status = status;
+    tag.textContent = STATUS_LABEL[status] || "New";
+    // Click cycles to the next status and saves — quick change without a menu.
+    tag.addEventListener("click", () => {
+      const next = STATUS_ORDER[(STATUS_ORDER.indexOf(tag.dataset.status) + 1) % STATUS_ORDER.length];
+      ids.setStatus(r.id, next);
+      tag.dataset.status = next;
+      tag.textContent = STATUS_LABEL[next];
+    });
 
     el.querySelector('[data-copy="email"]').addEventListener("click", (ev) => idCopy(ev.currentTarget, r.email, "Email"));
     el.querySelector('[data-copy="pass"]').addEventListener("click", (ev) => idCopy(ev.currentTarget, r.password, "Password"));
@@ -706,8 +725,14 @@ $("#gen-save").addEventListener("click", () => {
   const email = $("#gen-email").textContent;
   const password = $("#gen-pass").textContent;
   if (!email || email === "–") return;
-  ids.add({ label: $("#gen-label").value.trim(), email, password });
+  ids.add({
+    label: $("#gen-label").value.trim(),
+    email,
+    password,
+    status: $("#gen-status").value,
+  });
   $("#gen-label").value = "";
+  $("#gen-status").value = "new";
   toast("Saved");
   // Refresh the list if it's already open; otherwise it'll show on unlock.
   if (idsUnlocked) renderIdentities();
