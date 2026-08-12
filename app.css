@@ -301,8 +301,55 @@ body {
 .gen__val--mono { font-family: var(--font-mono); letter-spacing: .02em; }
 .gen__copy { flex: none; }
 .gen__copy.is-copied { border-color: var(--accent); color: var(--accent); }
-#gen-new { margin-top: 4px; }
-#gen-new svg { width: 17px; height: 17px; }
+.gen__actions { display: flex; gap: 10px; margin-top: 4px; }
+@media (max-width: 480px) { .gen__actions { flex-direction: column; } }
+#gen-new svg, #gen-save svg { width: 17px; height: 17px; }
+
+/* ── Saved identities ──────────────────────────────────────────────────── */
+
+.ids__gate { text-align: center; padding: 14px 0 6px; }
+.ids__gate-ic { width: 34px; height: 34px; color: var(--accent); margin-bottom: 10px; }
+.ids__gate-txt { margin: 0 0 14px; font-size: 13px; color: var(--text-dim); }
+.ids__gate-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
+.ids__gate-row .field__input {
+  flex: 1; padding: 11px 14px;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); color: var(--text);
+}
+.ids__gate-row .field__input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.ids__gate .err { margin: 12px auto 0; max-width: 420px; }
+
+.ids__list { display: grid; gap: 10px; }
+.ids__empty { text-align: center; padding: 18px 0; font-size: 13px; color: var(--muted); }
+
+.idrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+.idrow__label { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+.idrow__label:empty { display: none; }
+.idrow__pair { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.idrow__k { font-size: 11px; color: var(--muted); width: 34px; flex: none; text-transform: uppercase; letter-spacing: .05em; }
+.idrow__v { flex: 1; min-width: 0; font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all; }
+.idrow__v--mono { font-family: var(--font-mono); }
+.idrow__row2 { grid-column: 1; display: grid; gap: 6px; min-width: 0; }
+.idrow__acts { grid-column: 2; grid-row: 2 / 4; display: flex; flex-direction: column; gap: 6px; align-self: center; }
+.idrow__btn {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; flex: none;
+  border-radius: 9px; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-dim);
+  transition: all .16s var(--ease);
+}
+.idrow__btn:hover { border-color: var(--accent-mid); color: var(--accent); }
+.idrow__btn svg { width: 15px; height: 15px; }
+.idrow__btn.is-copied { border-color: var(--accent); color: var(--accent); }
+.idrow__btn--del:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
 
 /* ── App shell ─────────────────────────────────────────────────────────── */
 
