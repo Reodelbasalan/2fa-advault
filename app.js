@@ -536,6 +536,76 @@ function toast(msg, bad = false) {
   }, 2000);
 }
 
+/* ══ Generator ══════════════════════════════════════════════════════════ */
+//
+// Random email + password for filling a signup form. Same promise as the rest
+// of the app: made locally with crypto.getRandomValues, nothing saved,
+// nothing sent. The email is a display value — a plausible-looking random
+// address, not a working inbox.
+
+const GEN_DOMAINS = ["gmail.com", "outlook.com", "proton.me", "yahoo.com", "icloud.com"];
+const GEN_WORDS = ["max", "leo", "nova", "kai", "sky", "rio", "zed", "ash", "jax", "fox", "ace", "rey"];
+
+// Uniform pick from an array using rejection sampling, so no modulo bias.
+function pick(arr) {
+  const max = 256 - (256 % arr.length);
+  const buf = new Uint8Array(1);
+  let v;
+  do { crypto.getRandomValues(buf); v = buf[0]; } while (v >= max);
+  return arr[v % arr.length];
+}
+
+function randDigits(n) {
+  let s = "";
+  for (let i = 0; i < n; i++) s += String(pick("0123456789".split("")));
+  return s;
+}
+
+function randEmail() {
+  return `${pick(GEN_WORDS)}${pick(GEN_WORDS)}${randDigits(3)}@${pick(GEN_DOMAINS)}`;
+}
+
+// 16 chars from a set with no lookalikes (no 0/O, 1/l/I), guaranteed at least
+// one of each class so it satisfies the usual signup rules.
+function randPassword() {
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const nums  = "23456789";
+  const syms  = "!@#$%^&*?-_+";
+  const all = lower + upper + nums + syms;
+  const out = [pick(lower.split("")), pick(upper.split("")), pick(nums.split("")), pick(syms.split(""))];
+  for (let i = out.length; i < 16; i++) out.push(pick(all.split("")));
+  // Fisher–Yates so the guaranteed four aren't stuck at the front.
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = pick([...Array(i + 1).keys()]);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out.join("");
+}
+
+function generate() {
+  $("#gen-email").textContent = randEmail();
+  $("#gen-pass").textContent = randPassword();
+}
+
+async function genCopy(valId, btnId, label) {
+  const text = $(valId).textContent;
+  if (!text || text === "–") return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    return toast("Couldn't reach the clipboard", true);
+  }
+  const btn = $(btnId);
+  btn.classList.add("is-copied");
+  setTimeout(() => btn.classList.remove("is-copied"), 1400);
+  toast(`${label} copied`);
+}
+
+$("#gen-new").addEventListener("click", generate);
+$("#gen-email-copy").addEventListener("click", () => genCopy("#gen-email", "#gen-email-copy", "Email"));
+$("#gen-pass-copy").addEventListener("click", () => genCopy("#gen-pass", "#gen-pass-copy", "Password"));
+
 /* ══ Boot ═══════════════════════════════════════════════════════════════ */
 //
 // Straight into the list. No passphrase, no unlock step, no waiting. Last in
@@ -544,4 +614,5 @@ function toast(msg, bad = false) {
 entries = store.list();
 render();
 resetQuickOut();
+generate();
 tick();
