@@ -6,6 +6,7 @@
 
 import { totp, parseSecretInput } from "./totp.js";
 import * as store from "./store.js";
+import * as ids from "./identities.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -606,6 +607,112 @@ $("#gen-new").addEventListener("click", generate);
 $("#gen-email-copy").addEventListener("click", () => genCopy("#gen-email", "#gen-email-copy", "Email"));
 $("#gen-pass-copy").addEventListener("click", () => genCopy("#gen-pass", "#gen-pass-copy", "Password"));
 
+/* ══ Saved identities ═══════════════════════════════════════════════════ */
+//
+// The kept email/password rows. A passphrase GATE hides the list in the UI —
+// this is casual cover, not encryption: the rows sit in localStorage in the
+// clear and DevTools shows them regardless. The passphrase is checked here in
+// the client, so it is not a secret from anyone who reads this file either.
+
+// Change this to whatever you want. It's a UI gate, not real protection.
+const IDS_PASSPHRASE = "admin123";
+
+let idsUnlocked = false;
+
+function renderIdentities() {
+  const listEl = $("#ids-list");
+  const emptyEl = $("#ids-empty");
+  const rows = ids.list();
+
+  listEl.innerHTML = "";
+  emptyEl.hidden = rows.length > 0;
+
+  for (const r of rows) {
+    const el = document.createElement("div");
+    el.className = "idrow";
+    el.innerHTML = `
+      <span class="idrow__label"></span>
+      <div class="idrow__row2">
+        <div class="idrow__pair"><span class="idrow__k">Email</span><span class="idrow__v" data-email></span></div>
+        <div class="idrow__pair"><span class="idrow__k">Pass</span><span class="idrow__v idrow__v--mono" data-pass></span></div>
+      </div>
+      <div class="idrow__acts">
+        <button class="idrow__btn" data-copy="email" aria-label="Copy email"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M15 6.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button class="idrow__btn" data-copy="pass" aria-label="Copy password"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="9" width="16" height="12" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button class="idrow__btn idrow__btn--del" data-del aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-7 0 .8 12.1A1.5 1.5 0 0 0 9.3 20.5h5.4a1.5 1.5 0 0 0 1.5-1.4L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>`;
+
+    // textContent, never innerHTML — a generated value is never treated as markup.
+    el.querySelector(".idrow__label").textContent = r.label || "";
+    el.querySelector("[data-email]").textContent = r.email;
+    el.querySelector("[data-pass]").textContent = r.password;
+
+    el.querySelector('[data-copy="email"]').addEventListener("click", (ev) => idCopy(ev.currentTarget, r.email, "Email"));
+    el.querySelector('[data-copy="pass"]').addEventListener("click", (ev) => idCopy(ev.currentTarget, r.password, "Password"));
+    el.querySelector("[data-del]").addEventListener("click", () => {
+      ids.remove(r.id);
+      renderIdentities();
+      toast("Removed");
+    });
+
+    listEl.appendChild(el);
+  }
+}
+
+async function idCopy(btn, text, label) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    return toast("Couldn't reach the clipboard", true);
+  }
+  btn.classList.add("is-copied");
+  setTimeout(() => btn.classList.remove("is-copied"), 1400);
+  toast(`${label} copied`);
+}
+
+function unlockIdentities() {
+  idsUnlocked = true;
+  $("#ids-gate").hidden = true;
+  $("#ids-list").hidden = false;
+  $("#ids-lock").hidden = false;
+  $("#ids-pass").value = "";
+  renderIdentities();
+}
+
+function lockIdentities() {
+  idsUnlocked = false;
+  $("#ids-gate").hidden = false;
+  $("#ids-list").hidden = true;
+  $("#ids-empty").hidden = true;
+  $("#ids-lock").hidden = true;
+}
+
+$("#ids-gate-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const err = $("#ids-err");
+  if ($("#ids-pass").value === IDS_PASSPHRASE) {
+    err.hidden = true;
+    unlockIdentities();
+  } else {
+    err.textContent = "Wrong passphrase.";
+    err.hidden = false;
+    $("#ids-pass").value = "";
+  }
+});
+
+$("#ids-lock").addEventListener("click", lockIdentities);
+
+$("#gen-save").addEventListener("click", () => {
+  const email = $("#gen-email").textContent;
+  const password = $("#gen-pass").textContent;
+  if (!email || email === "–") return;
+  ids.add({ label: $("#gen-label").value.trim(), email, password });
+  $("#gen-label").value = "";
+  toast("Saved");
+  // Refresh the list if it's already open; otherwise it'll show on unlock.
+  if (idsUnlocked) renderIdentities();
+});
+
 /* ══ Boot ═══════════════════════════════════════════════════════════════ */
 //
 // Straight into the list. No passphrase, no unlock step, no waiting. Last in
@@ -615,4 +722,5 @@ entries = store.list();
 render();
 resetQuickOut();
 generate();
+lockIdentities();
 tick();
