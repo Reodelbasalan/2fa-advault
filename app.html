@@ -102,6 +102,44 @@
     </form>
   </section>
 
+  <!-- ══ GENERATOR ═══════════════════════════════════════════════════════ -->
+  <!-- Random email + password, for filling a signup form. Same as everything
+       else here: made locally, nothing saved, nothing sent. -->
+  <section class="qp" id="gen">
+    <header class="qp__head">
+      <h2 class="qp__title">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        Generate identity
+      </h2>
+      <span class="qp__note">Nothing here is saved.</span>
+    </header>
+
+    <div class="gen__row">
+      <span class="field__label">Random email</span>
+      <div class="gen__field">
+        <span class="gen__val" id="gen-email">–</span>
+        <button type="button" class="btn btn--ghost btn--icon gen__copy" id="gen-email-copy" aria-label="Copy email">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M15 6.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="gen__row">
+      <span class="field__label">Random password</span>
+      <div class="gen__field">
+        <span class="gen__val gen__val--mono" id="gen-pass">–</span>
+        <button type="button" class="btn btn--ghost btn--icon gen__copy" id="gen-pass-copy" aria-label="Copy password">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M15 6.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn--primary btn--block" id="gen-new" type="button">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8M20 3v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 16M4 21v-5h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Generate new
+    </button>
+  </section>
+
   <h2 class="sectionhead" id="saved-head">Saved accounts</h2>
   <main class="grid" id="grid"></main>
 
